@@ -5,7 +5,7 @@ use Omniphx\Forrest\Interfaces\AuthenticationInterface;
 
 
 class UsernamePassword implements AuthenticationInterface{
-	
+
 	/**
      * Interface for HTTP Client
      * @var GuzzleHttp\ClientInterface
@@ -18,9 +18,7 @@ class UsernamePassword implements AuthenticationInterface{
      */
     protected $settings;
 
-    public function __construct(
-        ClientInterface $client,
-        $settings)
+    public function __construct(ClientInterface $client, $settings)
     {
         $this->client   = $client;
         $this->settings = $settings;

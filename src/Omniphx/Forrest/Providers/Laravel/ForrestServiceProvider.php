@@ -40,8 +40,6 @@ class ForrestServiceProvider extends ServiceProvider {
 			$storage  = new \Omniphx\Forrest\Providers\Laravel\LaravelSession();
 			$input    = new \Omniphx\Forrest\Providers\Laravel\LaravelInput();
 
-			
-
 			switch ($settings['authenticationFlow']) {
 			    case 'WebServer':
 			        $authentication = new \Omniphx\Forrest\AuthenticationFlows\WebServer($client, $redirect, $input, $settings);

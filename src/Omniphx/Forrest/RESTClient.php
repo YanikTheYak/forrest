@@ -7,6 +7,7 @@ use Omniphx\Forrest\Interfaces\ResourceInterface;
 use Omniphx\Forrest\Interfaces\AuthenticationInterface;
 use Omniphx\Forrest\Exceptions\MissingTokenException;
 use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Stream\Stream;
 
 class RESTClient {
 
@@ -84,17 +85,50 @@ class RESTClient {
      */
     private function request($url, $options)
     {
-        $queryResults = false;
         try {
-            $queryResults = $this->resource->request($url, $options);
+            return $this->resource->request($url, $options);
         } catch (ClientException $e) {
             if ($e->hasResponse() && $e->getResponse()->getStatusCode() == '401') {
                 $this->refresh();
-                $queryResults = $this->resource->request($url, $options);
+                return $this->resource->request($url, $options);
+            }
+            else {
+
+                $body = $e->getResponse()->getBody();
+                if ($body instanceof Stream) {
+                    $data = json_decode($body->getContents());
+                }
+                // Test if body string is JSON and decode it into an array
+                elseif (is_string($body) && is_object(json_decode($body)) && (json_last_error() == JSON_ERROR_NONE)) {
+                    $data = json_decode($body);
+                } elseif (is_string($body)) {
+                    $data = $body;
+                }
+
+                $errorString = '';
+                if (is_array($data)) {
+                    foreach ($data as $error) {
+                        if (isset($error->errorCode)) {
+                            $errorString .= '[' . $error->errorCode . ']:';
+                        }
+                        if (isset($error->code)) {
+                            $errorString .= '[' . $error->code . ']:';
+                        }
+                        if (isset($error->message)) {
+                            $errorString .= $error->message;
+                        }
+                        if (is_string($error)) {
+                            $errorString .= $error;
+                        }
+                    }
+                    \Log::error( $e->getMessage() . ': ' . $errorString );
+                } elseif (isset($data)) {
+                    \Log::error( $e->getMessage() . ': ' . $data );
+                }
+
+                throw $e;
             }
         }
-
-        return $queryResults;
     }
 
     /**
@@ -141,7 +175,7 @@ class RESTClient {
         {
             $response = $this->authentication->authenticate();
             $jsonResponse = $response->json();
-            
+
             $this->storage->putToken($jsonResponse);
             $this->putResources();
         }
@@ -150,7 +184,7 @@ class RESTClient {
             $refreshToken = $this->storage->getRefreshToken();
             $response = $this->authentication->refresh($refreshToken);
             $jsonResponse = $response->json();
-            $this->storage->putToken($jsonResponse);   
+            $this->storage->putToken($jsonResponse);
         }
         return $this->storage->getToken();
     }
