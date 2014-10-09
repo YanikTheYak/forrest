@@ -86,13 +86,21 @@ class RESTClient {
     private function request($url, $options)
     {
         try {
+            $logString = 'SalesForce Request: '.$url;
+            if (!empty($options) && !is_null($options)) {
+                $logString = "\nwith options: ".is_array($options) ? json_encode($options) : $options;
+            }
+            \Log::info($logString);
             return $this->resource->request($url, $options);
-        } catch (ClientException $e) {
+        }
+        catch (ClientException $e) {
             if ($e->hasResponse() && $e->getResponse()->getStatusCode() == '401') {
                 $this->refresh();
                 return $this->resource->request($url, $options);
             }
             else {
+
+                \Log::error($e->getMessage());
 
                 $body = $e->getResponse()->getBody();
                 if ($body instanceof Stream) {
@@ -106,13 +114,13 @@ class RESTClient {
                 }
 
                 $errorString = '';
-                if (is_array($data)) {
+                if (isset($data) && is_array($data)) {
                     foreach ($data as $error) {
                         if (isset($error->errorCode)) {
-                            $errorString .= '[' . $error->errorCode . ']:';
+                            $errorString .= '[' . $error->errorCode . ']: ';
                         }
                         if (isset($error->code)) {
-                            $errorString .= '[' . $error->code . ']:';
+                            $errorString .= '[' . $error->code . ']: ';
                         }
                         if (isset($error->message)) {
                             $errorString .= $error->message;
@@ -121,9 +129,9 @@ class RESTClient {
                             $errorString .= $error;
                         }
                     }
-                    \Log::error( $e->getMessage() . ': ' . $errorString );
+                    \Log::error($errorString);
                 } elseif (isset($data)) {
-                    \Log::error( $e->getMessage() . ': ' . $data );
+                    \Log::error($data);
                 }
 
                 throw $e;
