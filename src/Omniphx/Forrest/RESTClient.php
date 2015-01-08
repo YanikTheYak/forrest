@@ -322,6 +322,24 @@ class RESTClient {
     }
 
     /**
+     * Calls next query
+     * @param       $nextUrl
+     * @param array $options
+     *
+     * @return mixed
+     */
+    public function next($nextUrl, $options = [])
+    {
+        $url  = $this->getToken()['instance_url'];
+        $url .= $this->storage->get('resources')['query'];
+        $url .= '/'.$nextUrl;
+
+        $queryResults = $this->request($url, $options);
+
+        return $queryResults;
+    }
+
+    /**
      * Details how Salesforce will process your query.
      * Available for API verison 30.0 or later
      * @param  string $query
