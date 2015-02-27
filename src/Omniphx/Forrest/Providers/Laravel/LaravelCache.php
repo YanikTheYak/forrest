@@ -1,4 +1,6 @@
-<?php namespace Omniphx\Forrest\Providers\Laravel;
+<?php
+
+namespace Omniphx\Forrest\Providers\Laravel;
 
 use Omniphx\Forrest\Interfaces\CacheInterface;
 use Omniphx\Forrest\Exceptions\MissingTokenException;
@@ -10,8 +12,7 @@ class LaravelCache implements CacheInterface {
 
 	public function get($key)
 	{
-		$value = Cache::get($key);
-		if (isset($value)) {
+		if (Cache::has($key)) {
 			return Cache::get($key);
 		}
 		throw new MissingKeyException(sprintf("No value for requested key: %s",$key));
@@ -28,10 +29,10 @@ class LaravelCache implements CacheInterface {
 		return Cache::put('token', $encyptedToken, 30);
 	}
 
-	public function getToken(){
-		$token = Cache::get('token');
-		if (isset($token)) {
-			return Crypt::decrypt($token);
+	public function getToken()
+	{
+		if (Cache::has('token')) {
+			return Crypt::decrypt(Cache::get('token'));
 		}
 
 		throw new MissingTokenException(sprintf('No token available in Cache'));

@@ -1,4 +1,6 @@
-<?php namespace Omniphx\Forrest;
+<?php
+
+namespace Omniphx\Forrest;
 
 use GuzzleHttp\ClientInterface;
 use Omniphx\Forrest\Interfaces\StorageInterface;
@@ -90,7 +92,7 @@ class RESTClient {
             if (!empty($options) && !is_null($options)) {
                 $logString = "\nwith options: ".is_array($options) ? json_encode($options) : $options;
             }
-            \Log::info($logString);
+            //\Log::info($logString);
             return $this->resource->request($url, $options);
         }
         catch (ClientException $e) {
