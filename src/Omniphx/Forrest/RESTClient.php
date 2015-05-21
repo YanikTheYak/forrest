@@ -333,8 +333,7 @@ class RESTClient {
     public function next($nextUrl, $options = [])
     {
         $url  = $this->getToken()['instance_url'];
-        $url .= $this->storage->get('resources')['query'];
-        $url .= '/'.$nextUrl;
+        $url .= $nextUrl;
 
         $queryResults = $this->request($url, $options);
 
