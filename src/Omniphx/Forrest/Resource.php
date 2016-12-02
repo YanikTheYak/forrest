@@ -119,11 +119,12 @@ class Resource implements ResourceInterface {
      */
     public function responseFormat($response,$format)
     {
-        if ($format == 'json') {
-            return $response->json();
-        }
-        else if ($format == 'xml') {
-            return $response->xml();
+        if (strlen((string)$response->getBody()) > 0) {
+            if ($format == 'json') {
+                return $response->json();
+            } else if ($format == 'xml') {
+                return $response->xml();
+            }
         }
 
         return $response;
